@@ -312,6 +312,32 @@ p{margin:0}
 .mbox img{width:100%;height:34vh;object-fit:cover;border-radius:10px}
 .cutin.fixed{position:fixed;z-index:60}
 
+/* vault: 翻栏杆 + 扑街 */
+.frame.vault{aspect-ratio:4/3;width:100%}
+#vimg4{object-position:28% 50%;transform-origin:30% 60%;transition:transform .08s}
+#vimg4.fly{animation:vfly .9s ease-in forwards}
+@keyframes vfly{0%{transform:scale(1.1)}40%{transform:scale(1.35) translate(6%,-10%) rotate(-4deg);filter:blur(1.5px)}100%{transform:scale(1.9) translate(14%,-30%) rotate(-12deg);filter:blur(5px);opacity:.15}}
+.vland{position:absolute;top:0;left:0;object-position:45% 62%}
+.vland.drop{animation:vdrop .38s cubic-bezier(.55,0,.8,.2) both}
+@keyframes vdrop{0%{transform:translateY(-115%) rotate(-14deg) scale(1.4)}100%{transform:none}}
+.vdust{position:absolute;top:0;right:0;bottom:0;left:0;pointer-events:none;z-index:3}
+.dust{position:absolute;bottom:16%;width:16px;height:16px;border-radius:50%;background:#d9cfbf;animation:dust .9s ease-out forwards}
+@keyframes dust{to{transform:translate(var(--dx),var(--dy)) scale(2.6);opacity:0}}
+.speedo{position:absolute;right:8px;bottom:8px;z-index:4;background:rgba(0,0,0,.72);border-radius:8px;padding:2px 10px;font-family:var(--display);color:var(--hazard)}
+.speedo b{font-size:30px;font-weight:400}
+.speedo span{font-size:12px;margin-left:4px;color:var(--paper)}
+.vbar{position:relative;height:36px;border:3px solid var(--paper);border-radius:8px;background:var(--ink-2);overflow:hidden}
+.vzone{position:absolute;top:0;bottom:0;background:#29e07a}
+.vcur{position:absolute;top:0;bottom:0;width:6px;margin-left:-3px;background:var(--paper);box-shadow:0 0 10px var(--paper)}
+.judges{display:flex;flex-direction:column;gap:6px}
+.jrow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;background:var(--ink-2);border:2px solid var(--muted);border-radius:10px;padding:6px 10px;animation:rise .35s both}
+.jrow b{font-family:var(--display);font-size:24px;font-weight:400;color:var(--hazard)}
+.jrow .jn{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);white-space:nowrap}
+.jrow .jn img{width:26px;height:26px;border-radius:50%;object-fit:cover}
+.jrow .jc{font-size:13px}
+.jrow.bro{border-color:var(--alarm)}
+.jtotal{font-family:var(--display);font-size:30px;text-align:center;animation:rise .4s both}
+
 /* shown only when scripts can't run (e.g. WeChat file preview) */
 .nojs{position:fixed;left:0;right:0;bottom:0;z-index:100;background:var(--alarm);color:var(--paper);font-size:15px;line-height:1.5;font-weight:700;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px))}
 
@@ -337,7 +363,7 @@ p{margin:0}
 
 <div id="app">
   <div class="top">
-    <span class="lvl" id="lvl">第 1 / 13 关</span>
+    <span class="lvl" id="lvl">第 1 / 14 关</span>
     <button class="mute" id="mute" type="button">声音：开</button>
   </div>
 
@@ -477,7 +503,27 @@ p{margin:0}
         </div>
       </div>
       <p class="say" id="runsay"></p>
-      <button class="btn" data-next type="button" hidden id="runnext">下一关：抽卡</button>
+      <button class="btn" data-next type="button" hidden id="runnext">下一关：翻栏杆</button>
+    </div>
+  </section>
+
+  <!-- vault: 翻栏杆 -->
+  <section class="stage" id="s_vault" hidden>
+    <div class="wrap">
+      <div class="eyebrow">体操决赛 · 男子翻栏杆</div>
+      <h1>文昊翻栏杆</h1>
+      <p class="note">第一步：3 秒内狂点「冲」，越快起跳绿区越宽。第二步：光标进绿区时点「跳」。落地姿势由 5 位裁判打分，总分 44 以上过关（满分 50）。</p>
+      <div class="frame vault" id="vaultframe">
+        <img class="ph" id="vimg4" data-img="p4" alt="文昊翻栏杆">
+        <img class="ph vland" id="vimg5" data-img="p5" alt="文昊趴在地上" hidden>
+        <div class="vdust" id="vdust"></div>
+        <div class="speedo"><b id="vkmh">0</b><span>km/h</span></div>
+      </div>
+      <div class="vbar" id="vbar" hidden><i class="vzone" id="vzone"></i><i class="vcur" id="vcur"></i></div>
+      <div class="judges" id="judges" hidden></div>
+      <p class="say" id="vsay">准备好就点「开始助跑」。</p>
+      <button class="btn red" id="vbtn" type="button">开始助跑</button>
+      <button class="btn" data-next type="button" hidden id="vaultnext">下一关：抽卡</button>
     </div>
   </section>
 
@@ -1211,6 +1257,125 @@ enter.s_run = () => {
   runIdle(); imgOf('f4').onload = () => { if (!RN) runIdle(); };
   leaveFns.push(() => { if (RN){ RN.over = true; cancelAnimationFrame(RN.raf); } RN = null; });
 };
+
+/* ---------- vault: 翻栏杆 + 扑街 ---------- */
+let VT = null;
+const JC = {
+  hi: ['教科书级扑街','脸部着地，非常标准','四肢舒展，像一张饼','落地无声，宛如落叶'],
+  mid: ['动作舒展，但鞋没飞','落地有声，扣 0.1','姿势可以，表情管理一般','建议进国家队'],
+  lo: ['助跑太慢','起跳犹豫','扑得不够平','像不小心摔的']
+};
+function vaultReset(){
+  if (VT) cancelAnimationFrame(VT.raf);
+  VT = {state:'idle', taps:0, raf:0};
+  const i4 = $('#vimg4'), i5 = $('#vimg5'); i4.className = 'ph'; i4.style.transform = ''; i4.hidden = false; i5.className = 'ph vland'; i5.hidden = true;
+  $('#vaultframe').querySelectorAll('.stamp').forEach(x => x.remove()); $('#vdust').innerHTML = '';
+  $('#vkmh').textContent = '0'; $('#vbar').hidden = true; $('#judges').hidden = true; $('#judges').innerHTML = '';
+  $('#vbtn').hidden = false; $('#vbtn').textContent = '开始助跑'; $('#vaultnext').hidden = true;
+  $('#vsay').textContent = '准备好就点「开始助跑」。';
+}
+function vaultRun(){
+  VT.state = 'run'; VT.taps = 0; VT.end = performance.now() + 3000; $('#vbtn').textContent = '冲！'; bell();
+  VT.tick = setInterval(() => {
+    const left = Math.max(0, (VT.end - performance.now())/1000);
+    $('#vsay').textContent = `助跑中……还剩 ${left.toFixed(1)} 秒，狂点「冲」！`;
+    if (left <= 0){ clearInterval(VT.tick); vaultAim(); }
+  }, 100);
+  timers.push(VT.tick);
+}
+function vaultAim(){
+  VT.state = 'aim'; VT.sp = Math.min(1, VT.taps/24);
+  VT.zw = 12 + VT.sp*12; VT.zc = rand(55, 82);
+  const z = $('#vzone'); z.style.left = (VT.zc - VT.zw/2) + '%'; z.style.width = VT.zw + '%';
+  $('#vbar').hidden = false; $('#vbtn').textContent = '跳！';
+  $('#vsay').textContent = `时速 ${Math.round(VT.taps*1.6)} km/h。光标进绿区时点「跳」！`;
+  VT.a0 = performance.now();
+  const loop = () => {
+    if (!VT || VT.state !== 'aim') return;
+    const t = (performance.now() - VT.a0)/1000, ph = (t*.55) % 1;
+    VT.p = (ph < .5 ? ph*2 : 2 - ph*2) * 100; $('#vcur').style.left = VT.p + '%';
+    if (t > 7) return vaultMiss();
+    VT.raf = requestAnimationFrame(loop);
+  };
+  loop();
+}
+function vaultMiss(){
+  VT.state = 'crash'; cancelAnimationFrame(VT.raf); $('#vbar').hidden = true; $('#vbtn').hidden = true;
+  $('#vimg4').style.transform = ''; boom(); flash(); $('#vsay').textContent = '哐！';
+  const f = $('#vaultframe'); stamp(f, f.clientWidth*.38, f.clientHeight*.55, '哐！撞栏杆', true);
+  fset(() => fail('s_vault', IMG.p8, '撞栏杆上了', '起跳时机没踩准，文昊和栏杆来了个亲密接触。', vaultReset), 900);
+}
+function vaultDust(){
+  const box = $('#vdust');
+  for (let i = 0; i < 16; i++){
+    const d = document.createElement('i'); d.className = 'dust';
+    const a = rand(Math.PI*1.05, Math.PI*1.95), r = rand(40,120);
+    d.style.left = rand(30,62) + '%'; d.style.setProperty('--dx', Math.cos(a)*r + 'px'); d.style.setProperty('--dy', Math.sin(a)*r*.6 + 'px');
+    d.addEventListener('animationend', () => d.remove()); box.appendChild(d);
+  }
+}
+function vaultAir(){
+  VT.state = 'air'; $('#vbar').hidden = true; $('#vbtn').hidden = true; $('#vsay').textContent = '起跳！！！';
+  const i4 = $('#vimg4'); i4.style.transform = ''; i4.classList.add('fly'); noise(.9,.35,0,6000); tone(300,.9,'sawtooth',.12,0,3);
+  fset(() => { const i5 = $('#vimg5'); i5.hidden = false; i5.classList.add('drop'); }, 850);
+  fset(() => { $('#vimg4').hidden = true; }, 1240);
+  fset(() => {
+    boom(); flash(); buzz(250); vaultDust();
+    const f = $('#vaultframe'); stamp(f, f.clientWidth*.5, f.clientHeight*.28, '扑街', true);
+    $('#vsay').textContent = '落地！裁判正在打分……';
+  }, 1230);
+  fset(vaultJudge, 2000);
+}
+function vaultJudge(){
+  const q = .45*VT.sp + .55*VT.tm, box = $('#judges'); box.innerHTML = ''; box.hidden = false;
+  const rows = ['裁判 A','裁判 B','裁判 C','裁判 D'].map(n => [n, Math.round(Math.max(5, Math.min(10, 7 + 3*q + rand(-.4,.4)))*10)/10, false]);
+  rows.push(['好兄弟', 10, true]);
+  let total = 0;
+  rows.forEach(([n, sc, bro], i) => {
+    total += sc;
+    fset(() => {
+      const r = document.createElement('div'); r.className = 'jrow' + (bro ? ' bro' : '');
+      r.innerHTML = '<span class="jn"></span><span class="jc"></span><b></b>';
+      const jn = r.querySelector('.jn');
+      if (bro){ const im = document.createElement('img'); im.src = IMG.bro; im.alt = ''; jn.appendChild(im); }
+      jn.appendChild(document.createTextNode(n));
+      r.querySelector('.jc').textContent = bro ? '兄弟必须满分，不接受反驳' : pick(sc >= 9.5 ? JC.hi : sc >= 8.5 ? JC.mid : JC.lo);
+      r.querySelector('b').textContent = sc.toFixed(1); box.appendChild(r);
+      tone(bro ? 1320 : 600 + sc*40, .12, 'square', .14); if (bro) flash();
+    }, i*450);
+  });
+  total = Math.round(total*10)/10;
+  fset(() => {
+    const pass = total >= 44, t = document.createElement('div'); t.className = 'jtotal';
+    t.textContent = `总分 ${total.toFixed(1)} / 50`; t.style.color = pass ? 'var(--hazard)' : 'var(--alarm)'; box.appendChild(t);
+    if (pass){
+      $('#vsay').textContent = total >= 48 ? '金牌！文昊用脸完成了完美落地。' : '过关！裁判一致认为这是今年最标准的扑街。';
+      horn(); confetti(40); $('#vaultnext').hidden = false;
+      fset(() => $('#vaultnext').scrollIntoView({behavior:'smooth', block:'center'}), 300);
+    } else {
+      $('#vsay').textContent = '差一点。'; thud();
+      fset(() => fail('s_vault', IMG.p8, `总分 ${total.toFixed(1)}，没进决赛`, '要 44 分以上。助跑再快一点，起跳再准一点。', vaultReset), 900);
+    }
+  }, rows.length*450 + 300);
+}
+$('#vbtn').addEventListener('pointerdown', e => {
+  e.preventDefault(); ac(); if (!VT) return;
+  if (VT.state === 'idle') return vaultRun();
+  if (VT.state === 'run'){
+    VT.taps++; $('#vkmh').textContent = Math.round(VT.taps*1.6);
+    const k = Math.min(VT.taps, 30);
+    $('#vimg4').style.transform = `scale(${1 + k*.008}) translate(${rand(-1,1)*k*.08}%, ${rand(-1,1)*k*.08}%)`;
+    tone(200 + VT.taps*18, .05, 'square', .12); buzz(8);
+    if (VT.taps % 4 === 0) float(e.clientX + rand(-40,40), e.clientY - 30, pick(['冲！','嗷！','风！','快！']));
+    return;
+  }
+  if (VT.state === 'aim'){
+    cancelAnimationFrame(VT.raf);
+    const d = Math.abs(VT.p - VT.zc);
+    if (d <= VT.zw/2){ VT.tm = 1 - d/(VT.zw/2); vaultAir(); } else vaultMiss();
+  }
+});
+enter.s_vault = () => { vaultReset(); leaveFns.push(() => { if (VT){ VT.state = 'gone'; cancelAnimationFrame(VT.raf); } }); };
 
 /* ---------- memory ---------- */
 const MEMSET = [['f1','背影文昊'],['f2','喝水文昊'],['f3','比耶文昊'],['f4','残影文昊'],['f6','潮州文昊'],['f7','等船文昊'],['f8','流泪文昊'],['bro','好兄弟']];
