@@ -426,7 +426,7 @@ p{margin:0}
       <div class="panel">
         <dl class="kv">
           <dt>帅气值</dt><dd>溢出<div class="meter"><i data-w="100"></i></div></dd>
-          <dt>抽象值</dt><dd>MAX<div class="meter"><i data-w="100"></i></div></dd>
+          <dt>松弛感</dt><dd>拉满<div class="meter"><i data-w="100"></i></div></dd>
           <dt>比耶熟练度</dt><dd>宗师级</dd>
           <dt>黑衣服出镜率</dt><dd>3 / 3 张（100%）</dd>
           <dt>帽子依赖度</dt><dd>2 / 3 张</dd>
@@ -499,7 +499,7 @@ p{margin:0}
   <!-- runner -->
   <section class="stage" id="s_run" hidden>
     <div class="wrap">
-      <div class="eyebrow">体能测试 · 难度：雷霆</div>
+      <div class="eyebrow">体能测试 · 难度：比周一还难</div>
       <h1>文昊跑酷</h1>
       <p class="note">点画面跳，空中还能再跳一次。躲开体检报告、闹钟、KPI、房贷和会飞的周一，跑满 800 米过关。越跑越快。</p>
       <div class="runbox" id="runbox">
@@ -928,7 +928,7 @@ function accept(){ ac(); horn(); boom(.05); flash(); shake(); timers.push(setTim
 enter.s1 = () => {
   const bar = $('#bar'), pct = $('#pct'), log = $('#log'); let p = 0, energy = 0;
   log.innerHTML = ''; $('#charge').hidden = true; bar.style.width = '0'; pct.textContent = '0%';
-  const lines = ['> 载入帅气………………OK','> 载入抽象………………OK','> 载入黑色衣服 ×999……OK','> 载入元朗回忆…………OK',
+  const lines = ['> 载入帅气………………OK','> 载入发疯文学…………OK','> 载入黑色衣服 ×999……OK','> 载入元朗回忆…………OK',
                  '> 载入比耶手势…………OK','> 载入年龄………………⚠ 数值偏大','> 载入作息………………⚠ 已放弃治疗'];
   const add = (t, cls) => { const d = document.createElement('div'); d.textContent = t; if (cls) d.className = cls; log.appendChild(d); };
   const t = setInterval(() => {
@@ -948,7 +948,7 @@ enter.s1 = () => {
     energy = Math.min(100, energy + 5);
     $('#energy').textContent = `充能 ${energy}%`;
     fb.classList.add('pop'); setTimeout(() => fb.classList.remove('pop'), 80);
-    float(e.clientX + rand(-30,30), e.clientY - 30, pick(['+帅','+抽象','+1岁','+雷霆','+黑衣服','+比耶']));
+    float(e.clientX + rand(-30,30), e.clientY - 30, pick(['+帅','+1岁','+松弛感','+显眼包','+黑衣服','+比耶']));
     tone(220+energy*9,.07,'square',.16); buzz(15);
     if (energy >= 100){
       bar.style.width = '100%'; pct.textContent = '100%'; add('> 加载完成。寿星已上线。');
@@ -958,7 +958,7 @@ enter.s1 = () => {
 };
 
 /* 2 · stamps */
-const stampWords = ['元朗之光','官方认证','黑衣人','比耶专业户','帅到违规','抽象大师','此人很帅','已鉴定','真·寿星','元朗限定'];
+const stampWords = ['元朗之光','官方认证','黑衣人','比耶专业户','帅到违规','显眼包本包','此人很帅','已鉴定','真·寿星','元朗限定'];
 function stamp(frame, x, y, txt, big){
   const s = document.createElement('div'); s.className = 'stamp' + (big ? ' big' : '');
   s.textContent = txt; s.style.left = x+'px'; s.style.top = y+'px'; s.style.setProperty('--r', rand(-22,22)+'deg');
@@ -1775,7 +1775,7 @@ function danceJudge(kind, lane){
   DN.judged++;
   if (kind === 'miss'){ DN.combo = 0; }
   else { DN.hits++; DN.combo++; DN.fx.push({lane, t:performance.now()/1000}); }
-  const j = $('#djudge'); j.textContent = kind === 'perfect' ? '雷霆！' : kind === 'good' ? '抽象' : 'MISS 扑街';
+  const j = $('#djudge'); j.textContent = kind === 'perfect' ? '绝绝子！' : kind === 'good' ? '芜湖~' : 'MISS 扑街';
   j.className = 'djudge'; void j.offsetWidth; j.className = 'djudge show ' + kind;
   $('#dscore').textContent = `命中 ${Math.round(DN.hits/DN.judged*100)}%`;
   $('#dcombo').textContent = DN.combo >= 5 ? DN.combo + ' 连击' : '';
@@ -1857,7 +1857,7 @@ const FORMS = [
   {name:'体检报告', moves:['尿酸偏高','建议复查','血脂超标','熬夜罚单'], taunt:'你的指标，我全都知道。', wind:800, gap:[1200,2200], dmg:13},
   {name:'周一早上七点', moves:['该起床了','早会开始','需求又改了','周报交了吗'], taunt:'叮铃铃铃铃铃铃铃！', wind:660, gap:[1000,1900], dmg:16}
 ];
-const HITWORDS = ['啪！','一岁一拳！','生日快乐拳！','黑衣重拳！','元朗直拳！','抽象勾拳！','咚！'];
+const HITWORDS = ['啪！','一岁一拳！','生日快乐拳！','黑衣重拳！','元朗直拳！','退！退！退！','咚！'];
 const me = $('#me'), boss = $('#boss'), arena = $('#arena');
 let F = null;
 const fset = (fn, ms) => { const t = setTimeout(fn, ms); timers.push(t); return t; };
@@ -1989,7 +1989,7 @@ document.addEventListener('keydown', e => {
 });
 
 /* 8 · finale */
-const WISHES = ['一拳打赢岁月','岁岁平安，年年暴富','黑衣服永远显瘦','去哪都一路绿灯','喝水自由，奶茶自由，人生自由','头发茂密，烦恼稀疏','好兄弟永远是好兄弟','以及——','继续抽象下去'];
+const WISHES = ['一拳打赢岁月','岁岁平安，年年暴富','黑衣服永远显瘦','去哪都一路绿灯','喝水自由，奶茶自由，人生自由','头发茂密，烦恼稀疏','好兄弟永远是好兄弟','以及——','永远做最靓的显眼包'];
 function explode(){
   boom(); horn(); flash(); shake(); confetti(50); faceRain(14);
   let n = 0; const t = setInterval(() => { faceRain(2); confetti(5); if (++n > 40) clearInterval(t); }, 180); timers.push(t);
@@ -2006,7 +2006,7 @@ $('#again').addEventListener('click', explode);
 $('#restart').addEventListener('click', () => { dodges = 0; noBtn.textContent = '拒绝'; noBtn.classList.add('ghost'); noBtn.style.transform = ''; remix = 1; $('#remix').textContent = 'BGM 加速版'; go(0); });
 $('#s8').addEventListener('pointerdown', e => {
   if (e.target.closest('button')) return;
-  burst(e.clientX, e.clientY); boom(); float(e.clientX, e.clientY - 40, pick(['生日快乐！','暴富！','雷霆！','+1岁','帅！','抽象！']));
+  burst(e.clientX, e.clientY); boom(); float(e.clientX, e.clientY - 40, pick(['生日快乐！','暴富！','绝绝子！','+1岁','帅！','芜湖起飞！']));
 });
 
 go(0);
